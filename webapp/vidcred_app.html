@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ViDF — Video Deep Fact-Checking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark"><img src="css/logo.png" alt="ViDF logo"/></div>
+    <div>
+      <div class="logo-text">ViDF</div>
+    </div>
+    <div class="logo-sub">Video Deep Fact-Checking</div>
+  </div>
+  <button class="demos-btn" id="demosBtn" onclick="openDemosModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Demos
+  </button>
+</header>
+
+<div class="main">
+
+
+  <aside class="panel-left">
+
+
+    <div class="panel-section">
+      <div class="section-label">Video</div>
+      <div class="video-zone" id="videoZone">
+        <input type="file" accept="video/*" id="videoFile" onchange="handleVideoUpload(event)"/>
+        <div class="video-placeholder" id="videoPlaceholder">
+          <div class="upload-icon">🎬</div>
+          <div class="upload-text"><strong>Upload video</strong> or drag & drop<br/>MP4 · MOV · up to 3 min</div>
+        </div>
+        <video id="videoPlayer" controls ontimeupdate="onVideoTimeUpdate()"></video>
+      </div>
+      <div class="video-controls" id="videoControls" style="display:none">
+        <button class="ctrl-btn" onclick="seekVideo(-5)">⏮ 5s</button>
+        <button class="ctrl-btn" onclick="seekVideo(5)">5s ⏭</button>
+        <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+        <button class="ctrl-btn" onclick="changeVideo(event)">🔄 Change</button>
+      </div>
+    </div>
+
+
+    <div class="panel-section">
+      <div class="section-label">Caption/Title</div>
+      <textarea class="caption-box" id="captionBox" rows="3" placeholder="Paste the post caption, your claim to verify, or a question…"></textarea>
+    </div>
+
+
+    <div class="panel-section" id="transcriptSectionLeft">
+      <div class="card-head">
+        <div class="section-label">Transcript</div>
+        <div class="card-status" id="transcriptCardStatus"></div>
+      </div>
+      <div id="transcriptListLeft">
+        <div class="empty-state"><div class="empty-icon">📝</div>No transcript yet.</div>
+      </div>
+    </div>
+
+
+    <div class="panel-section">
+      <button class="btn-analyze" id="analyzeBtn" style="width:100%" onclick="runAnalysis()" disabled>▶ Analyze</button>
+    </div>
+
+
+    <div class="panel-section reveal-block" id="claimSectionLeft" style="border-bottom:none">
+      <div class="card-head">
+        <div class="section-label">Extracted Claim Units</div>
+      </div>
+
+      <div class="card-head" style="margin-top:6px">
+        <div class="section-label" style="font-size:10px;color:var(--text3)">Title claims</div>
+        <div class="card-status" id="claimTitleStatus"></div>
+      </div>
+      <div id="claimUnitsTitle">
+        <div class="empty-state" style="padding:12px"><div class="empty-icon" style="font-size:16px">🔎</div>Run analysis</div>
+      </div>
+
+      <div class="card-head" id="claimSpeechHead" style="margin-top:10px;display:none">
+        <div class="section-label" style="font-size:10px;color:var(--text3)">Speech claims</div>
+        <div class="card-status" id="claimSpeechStatus"></div>
+      </div>
+      <div id="claimUnitsSpeech" style="display:none">
+        <div class="empty-state" style="padding:12px"><div class="empty-icon" style="font-size:16px">🔎</div>Run analysis</div>
+      </div>
+    </div>
+
+  </aside>
+
+
+  <main class="panel-center">
+
+    <div class="center-top">
+      <div class="analysis-header">
+        <div class="analysis-title">Evidence Analysis</div>
+        <div class="status-badge" id="statusBadge" style="background:var(--bg);border-color:var(--border2);color:var(--text3)">IDLE</div>
+      </div>
+    </div>
+
+
+    <div class="center-block reveal-block" id="textAnalysisContainer">
+      <div class="block-header">
+        <div class="timeline-title">Text Analysis</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)">LAYER 1 · TEXT</div>
+      </div>
+      <div class="text-analysis-grid">
+        <div class="text-analysis-card reveal-block" id="titleCard">
+          <div class="card-head">
+            <div class="section-label">Title</div>
+            <div class="card-status" id="titleCardStatus"></div>
+          </div>
+          <div class="highlighted-text" id="titleAnalysis">
+            <span style="color:var(--text3)">Run analysis</span>
+          </div>
+          <button class="detail-btn" id="titleDetailBtn" style="display:none" onclick="openDetailModal('title')">Detail →</button>
+        </div>
+        <div class="text-analysis-card reveal-block" id="speechCard">
+          <div class="card-head">
+            <div class="section-label">Speech</div>
+            <div class="card-status" id="speechCardStatus"></div>
+          </div>
+          <div class="highlighted-text" id="speechAnalysis">
+            <span style="color:var(--text3)">Run analysis</span>
+          </div>
+          <button class="detail-btn" id="speechDetailBtn" style="display:none" onclick="openDetailModal('speech')">Detail →</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="center-block reveal-block" id="visualAnalysisContainer">
+      <div class="block-header">
+        <div class="timeline-title">Visual Analysis</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)">LAYER 2 · VISUAL</div>
+      </div>
+      <div class="visual-analysis-grid">
+        <div class="visual-analysis-card reveal-block" id="temporalCard">
+          <div class="card-head">
+            <div class="section-label">Temporal</div>
+            <div class="card-status" id="temporalCardStatus"></div>
+          </div>
+          <div class="frame-grid" id="temporalFrames">
+            <div class="empty-state" style="padding:12px;grid-column:1/-1"><div class="empty-icon" style="font-size:16px">🎞️</div>Run analysis</div>
+          </div>
+          <button class="detail-btn" id="temporalDetailBtn" style="display:none" onclick="openDetailModal('temporal')">Detail →</button>
+        </div>
+        <div class="visual-analysis-card reveal-block" id="cgiCard">
+          <div class="card-head">
+            <div class="section-label">CGI</div>
+            <div class="card-status" id="cgiCardStatus"></div>
+          </div>
+          <div class="frame-grid" id="cgiFrames">
+            <div class="empty-state" style="padding:12px;grid-column:1/-1"><div class="empty-icon" style="font-size:16px">🎞️</div>Run analysis</div>
+          </div>
+          <button class="detail-btn" id="cgiDetailBtn" style="display:none" onclick="openDetailModal('cgi')">Detail →</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="center-block reveal-block" style="margin-bottom:16px" id="crossModalAnalysisContainer">
+      <div class="block-header">
+        <div class="timeline-title">Cross-modal Analysis</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)">LAYER 3 · CROSS-MODAL</div>
+      </div>
+      <div class="visual-analysis-grid">
+        <div class="visual-analysis-card reveal-block" id="crossModalCard">
+          <div class="card-head">
+            <div class="section-label">Title vs. Video</div>
+            <div class="card-status" id="crossModalCardStatus"></div>
+          </div>
+          <div class="reasoning-box" id="crossModalBox">
+            <em style="color:var(--text3)">No analysis yet. Upload a video, then click Analyze.</em>
+          </div>
+          <button class="detail-btn" id="crossModalDetailBtn" style="display:none" onclick="openDetailModal('crossModal')">Detail →</button>
+        </div>
+        <div class="visual-analysis-card reveal-block" id="speechVideoCard">
+          <div class="card-head">
+            <div class="section-label">Speech vs. Video</div>
+            <div class="card-status" id="speechVideoCardStatus"></div>
+          </div>
+          <div class="reasoning-box" id="speechVideoBox">
+            <em style="color:var(--text3)">No analysis yet. Upload a video, then click Analyze.</em>
+          </div>
+          <button class="detail-btn" id="speechVideoDetailBtn" style="display:none" onclick="openDetailModal('speechVideo')">Detail →</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+
+  <aside class="panel-right">
+
+
+    <div class="decision-zone">
+
+
+      <div class="verdict-section reveal-block" id="verdictSection">
+        <div class="section-label">Final Verdict</div>
+
+        <div class="verdict-card" id="verdictCard" style="background:var(--bg);border-color:var(--border);">
+          <div class="verdict-icon" id="verdictIcon">⏳</div>
+          <div class="verdict-label" id="verdictLabel" style="color:var(--text3)">PENDING</div>
+          <div class="verdict-gauge">
+            <svg width="88" height="52" viewBox="0 0 88 52">
+              <path d="M 8 48 A 36 36 0 0 1 80 48" fill="none" stroke-width="7" stroke-linecap="round" opacity="0.35" id="gaugeTrack"></path>
+              <path d="M 8 48 A 36 36 0 0 1 80 48" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="113" id="gaugeFill"></path>
+              <text x="44" y="46" text-anchor="middle" font-size="14" font-weight="600" id="gaugePct">—</text>
+            </svg>
+            <div class="verdict-gauge-caption">Confidence score</div>
+          </div>
+        </div>
+        <div class="entity-list" id="fakeTypesRow" style="margin-top:10px"></div>
+      </div>
+
+
+      <div class="reasoning-section reveal-block" id="reasoningSection">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="section-label" style="margin-bottom:0">Reasoning Summary</div>
+          <button class="export-pdf-btn" id="reasoningExportBtn" style="display:none" onclick="exportReasoningPdf()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            Export PDF
+          </button>
+        </div>
+        <div class="reasoning-box-wrap">
+          <div class="reasoning-box" id="reasoningBox">
+            <em style="color:var(--text3)">No analysis yet. Upload a video or load a demo scenario, then click Analyze.</em>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="evidence-zone reveal-block" id="evidenceZone">
+      <div class="card-head" style="padding:12px 18px 0">
+        <div class="section-label">Evidence</div>
+        <div class="card-status" id="evidenceCardStatus"></div>
+      </div>
+
+      <div class="tab-content active" id="tab-evidence">
+        <div id="evidenceList">
+          <div class="empty-state"><div class="empty-icon">📰</div>No evidence retrieved yet.</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<div class="modal-overlay" id="detailModalOverlay" onclick="if(event.target===this) closeDetailModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="detailModalTitle">Detail</div>
+      <button class="modal-close" onclick="closeDetailModal()">✕</button>
+    </div>
+    <div class="modal-body" id="detailModalBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="demosModalOverlay" onclick="if(event.target===this) closeDemosModal()">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-head">
+      <div class="modal-title">Choose a demo</div>
+      <button class="modal-close" onclick="closeDemosModal()">✕</button>
+    </div>
+    <div class="modal-body" id="demosModalBody" style="padding:0;"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="videoTooLongModalOverlay" onclick="if(event.target===this) closeVideoTooLongModal()">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-head">
+      <div class="modal-title">Video Too Long</div>
+      <button class="modal-close" onclick="closeVideoTooLongModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="videoTooLongBody"></p>
+      <button class="btn-analyze" style="margin-top:14px;" onclick="closeVideoTooLongModal()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/detail-modals.js"></script>
+<script src="js/demos.js"></script>
+<script src="js/pdf-export.js"></script>
+</body>
+</html>

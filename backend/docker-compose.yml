@@ -1,0 +1,27 @@
+services:
+  fakemark:
+    build: .
+    ports:
+      - "8080:8080"
+    ipc: host
+    shm_size: "2gb"
+    env_file:
+      - .env
+    volumes:
+ 
+      - .:/app
+      - ../webapp:/app/webapp
+      - nllb-models:/app/models
+      - hf-cache:/root/.cache/huggingface
+    command: uvicorn api:app --host 0.0.0.0 --port 8080 --reload
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  hf-cache:
+  nllb-models:

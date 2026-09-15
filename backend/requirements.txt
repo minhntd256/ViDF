@@ -1,0 +1,17 @@
+openai
+numpy
+Pillow
+decord            
+opencv-python     
+fastapi           
+uvicorn[standard] 
+python-multipart  
+torch             
+faster-whisper    
+                  
+ffmpeg-python     
+                  
+google-genai      
+tavily-python    
+
+
