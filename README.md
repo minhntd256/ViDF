@@ -62,7 +62,7 @@ For detailed instructions on installation, configuration, and running the system
 
 ## Demo Video
 
-▶️ Watch the ViDF demo: [Demo Video]([https://www.youtube.com/](https://youtu.be/a0cSEDQbxV0))
+▶️ Watch the ViDF demo: [Demo Video](https://youtu.be/a0cSEDQbxV0)
 
 ---
 ## Demo Web
