@@ -67,7 +67,7 @@ For detailed instructions on installation, configuration, and running the system
 ---
 ## Demo Web
 
-The ViDF web interface is designed to be deployed and run locally following the instructions provided to [setup](#getting_started).
+The ViDF web interface is designed to be deployed and run locally following the instructions provided in [Getting Started](#getting-started).
 Since the online demo is not continuously hosted, if you would like to access a live demo, please contact the authors.
 
 ---
