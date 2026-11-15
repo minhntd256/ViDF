@@ -82,5 +82,3 @@ This project is distributed under the **MIT License**. See the [LICENSE](LICENSE
 For questions or feedback, please contact:
 
 📧 **Nguyen Tran Duy Minh** – [ntdminh@jaist.ac.jp](mailto:ntdminh@jaist.ac.jp)
-
-✨ **Project Website:** [ViDF Project Website](https://www.jaist.ac.jp/)
